@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <script src="//unpkg.com/alpinejs" defer async></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer async></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        /* configure the size of the map */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+    <body>
+      <div id="map"></div>
+    </body>
+    <script defer>
+      var map = L.map('map').setView({lat: 35.31796, lon: 25.10308}, 19);
+
+      // add the OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> | HMU data provided by <a href="https://poiw.org">po/iw hackerspace</a>.'
+      }).addTo(map);
+
+      // show the scale bar on the lower left corner
+      L.control.scale({imperial: true, metric: true}).addTo(map);
+
+      // show a marker on the map
+      L.marker({lat: 35.3184293, lon: 25.1032471}).bindPopup('po/iw hackerspace. Φοιτητικό εργαστήριο ελευθέρας χρήσης.').addTo(map);
+    </script>
+</html>
