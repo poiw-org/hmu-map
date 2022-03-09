@@ -1,10 +1,16 @@
 <html>
   <head>
-    <script src="//unpkg.com/alpinejs" defer async></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer async></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <title>Lab Maps</title>
+    <meta charset="utf-8" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
     <style>
-      html, body {
+      html,
+      body {
         height: 100%;
         padding: 0;
         margin: 0;
@@ -16,22 +22,53 @@
       }
     </style>
   </head>
-    <body>
-      <div id="map"></div>
-    </body>
-    <script defer>
-      var map = L.map('map').setView({lat: 35.31796, lon: 25.10308}, 19);
 
-      // add the OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  <body>
+    <div id="map"></div>
+  </body>
+
+  <script defer>
+    let config = {
+      minZoom: 6,
       maxZoom: 19,
-      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> | HMU data provided by <a href="https://poiw.org">po/iw hackerspace</a>.'
-      }).addTo(map);
+    };
 
-      // show the scale bar on the lower left corner
-      L.control.scale({imperial: true, metric: true}).addTo(map);
+    const zoom = 18;
+    const lat = 35.31796;
+    const lng = 25.10308;
 
-      // show a marker on the map
-      L.marker({lat: 35.3184293, lon: 25.1032471}).bindPopup('po/iw hackerspace. Φοιτητικό εργαστήριο ελευθέρας χρήσης.').addTo(map);
-    </script>
+    var map = L.map("map", config).setView([lat, lng], zoom);
+
+    // add the OpenStreetMap tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> | HMU data provided by <a href="https://poiw.org">po/iw hackerspace</a>.',
+    }).addTo(map);
+
+    // show the scale bar on the lower left corner
+    L.control.scale({ imperial: true, metric: true }).addTo(map);
+
+    // show a marker on the map
+    L.marker({ lat: 35.3184293, lon: 25.1032471 })
+      .bindPopup("po/iw hackerspace. Φοιτητικό εργαστήριο ελευθέρας χρήσης.")
+      .addTo(map);
+
+    L.marker({ lon: 67.36673884, lat: 25.10293555 })
+      .bindPopup("Γεωπονία")
+      .addTo(map);
+
+    // obtaining coordinates after clicking on the map
+    map.on("click", function (e) {
+      console.log(e.latlng);
+      L.marker(e.latlng, {
+        draggable: true,
+        autoPan: true,
+      })
+        .addTo(map)
+        .on("dragend", function (e) {
+          console.log(e.latlng);
+        });
+    });
+  </script>
 </html>
