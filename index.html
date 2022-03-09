@@ -16,7 +16,6 @@
         margin: 0;
       }
       #map {
-        /* configure the size of the map */
         width: 100%;
         height: 100%;
       }
@@ -43,19 +42,18 @@
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution:
-        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> | HMU data provided by <a href="https://poiw.org">po/iw hackerspace</a>.',
+        '&#127279; <a href="https://poiw.org">po/iw hackerspace</a>',
     }).addTo(map);
 
     // show the scale bar on the lower left corner
     L.control.scale({ imperial: true, metric: true }).addTo(map);
 
-    // show a marker on the map
     L.marker({ lat: 35.3184293, lon: 25.1032471 })
       .bindPopup("po/iw hackerspace. Φοιτητικό εργαστήριο ελευθέρας χρήσης.")
       .addTo(map);
 
-    L.marker({ lon: 67.36673884, lat: 25.10293555 })
-      .bindPopup("Γεωπονία")
+    L.marker({ lat: 35.318388390440674, lng: 25.102925598621372 })
+      .bindPopup("Εργαστήριο 2 και 3")
       .addTo(map);
 
     // obtaining coordinates after clicking on the map
