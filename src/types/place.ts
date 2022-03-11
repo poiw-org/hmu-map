@@ -1,4 +1,4 @@
-import { PlaceType } from "./place_types"
+import type { PlaceType } from "./place_types"
 
 export default interface Place {
     name: {
@@ -9,7 +9,10 @@ export default interface Place {
         en: string,
         el: string
     },
+    website: string | undefined,
+    telephone: string | undefined,
     coordinates: number[],
     floor: number,
-    type: PlaceType
+    type: PlaceType,
+    keywords: string[]
 }

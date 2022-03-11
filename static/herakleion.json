@@ -18,7 +18,26 @@
                 25.1032471
             ],
             "floor": 1,
-            "type": 5
+            "type": 5,
+            "keywords": ["poiw", "hackerspace"]
+        },
+        {
+            "name": {
+                "en": "Studio FM1 Student Radio Station",
+                "el": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου"
+            },
+            "description": {
+                "en": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου",
+                "el": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου"
+            },
+            "coordinates":[
+
+                35.3185,
+                25.10326
+            ],
+            "floor": 1,
+            "type": 5,
+            "keywords": ["fm1", "studio", "radio"]
         }
     ]
 }
