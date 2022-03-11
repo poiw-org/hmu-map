@@ -1,0 +1,24 @@
+{
+    "name": {
+        "en": "HERAKLEION CAMPUS",
+        "el": "ΠΑΝΕΠΙΣΤΗΜΙΟΥΠΟΛΗ ΗΡΑΚΛΕΙΟΥ"
+    },
+    "places":[
+        {
+            "name": {
+                "en": "po/iw: Student hackerspace",
+                "el": "po/iw: Εργαστήριο ελευθέρας χρήσης"
+            },
+            "description": {
+                "en": "po/iw: Student hackerspace",
+                "el": "po/iw: Εργαστήριο ελευθέρας χρήσης"
+            },
+            "coordinates":[
+                35.3184293,
+                25.1032471
+            ],
+            "floor": 1,
+            "type": 5
+        }
+    ]
+}
