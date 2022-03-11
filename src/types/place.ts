@@ -6,13 +6,14 @@ export default interface Place {
         el: string
     },
     description: {
-        en: string,
-        el: string
+        en: string | undefined,
+        el: string | undefined
     },
     website: string | undefined,
     telephone: string | undefined,
     coordinates: number[],
     floor: number,
     type: PlaceType,
-    keywords: string[]
+    keywords: string[],
+    lessons: string[],
 }

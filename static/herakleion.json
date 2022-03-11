@@ -38,6 +38,42 @@
             "floor": 1,
             "type": 5,
             "keywords": ["fm1", "studio", "radio"]
+        },
+        {
+            "name": {
+                "en": "Microelectronics Laboratory",
+                "el": "Εργαστηρίο Μικροηλεκτρονικής"
+            },
+
+            "coordinates":[
+
+                35.31845748665334,
+                25.1031271572207
+            ],
+            "floor": 1,
+            "type": 0,
+            "keywords": ["micro", "electronics", "lab"]
+        },
+        {
+            "name": {
+                "en": "K28",
+                "el": "K28"
+            },
+
+            "description": {
+                "el": "Πολυχώρος, Αίθουσα Τελετών",
+                "en": "Multipurpose space"
+            },
+
+            "coordinates":[
+
+                35.31663440216848, 25.102073049092628
+            ],
+            "floor": 0,
+            "type": 1,
+            "keywords": ["classroom","αιθουθα","αίθουσα"]
         }
+
+
     ]
 }
