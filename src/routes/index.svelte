@@ -16,6 +16,7 @@
     let fuse: any;
 
     let doSearch: () => Promise<void>;
+    let focusMap: (place: Place) => Promise<void>;
 
     let searchBoxEvent = (e) => {
             if(e.type == "keydown" || e.type == "change" || e.type == "keyup" ) {
@@ -62,10 +63,12 @@
             const lng = 25.10308;
 
             var map = L.map("map", config).setView([lat, lng], zoom);
+            var markers = new L.layerGroup();
+
             campus = (await axios.get("./herakleion.json")).data
 
 
-            fuse = new Fuse(campus.places, {
+            fuse = new Fuse([], {
                 includeScore: true,
                 useExtendedSearch: true,
                 keys: ['name.en', 'name.el', "description.en", "description.el", 'keywords']
@@ -83,15 +86,41 @@
             // L.control.scale({ imperial: true, metric: true }).addTo(map);
 
             campus.places.forEach((place: Place) => {
-                console.log(fuse.getIndex().size())
-                L.marker({ lat: place.coordinates[0], lon: place.coordinates[1] })
-                .bindPopup(place.description.el)
+                let marker = new L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
+                    icon: new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                        iconAnchor: new L.Point(16, 16),
+                    })
+                })
+                .bindPopup(place.description ? place.description.el : "")
                 .addTo(map);
+
+                fuse.add({
+                    ...place,
+                    marker: marker._leaflet_id
+                })
+
+                markers.addLayer(marker)
             });
 
             doSearch = async () => {
                 searchResults = fuse.search(searchQuery);
                 console.log(searchResults)
+            }
+
+            focusMap = async (place: Place) => {
+                map.setView([place.coordinates[0]-0.0001,place.coordinates[1]], 20); // We subtract 0.0001 from the Y axis so that we can position the info panel correctly
+
+                let marker = new L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
+                    icon: new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                        iconAnchor: new L.Point(16, 16),
+                    })
+                })
+                    .bindPopup(place.description ? place.description.el : "")
+                    .addTo(map);
+
+                showOverlay = false;
             }
 
             // obtaining coordinates after clicking on the map
@@ -131,7 +160,7 @@
                         <div class="bg-white p-4 w-64 md:w-96 -mt-12 flex flex-col gap-5">
                             {#if searchResults}
                                 {#each searchResults as place}
-                                    <div class="cursor-pointer " on:click={toggleOverlay}>{place.item.name.en}</div>
+                                    <div class="cursor-pointer " on:click={focusMap(place.item)}>{place.item.name.el}</div>
                                 {/each}
                                 {:else}
                                 <span class="text-2xl">Δεν βρέθηκαν αποτελέσματα για την αναζήτησή σου. Μήπως έχεις επιλέξει λάθος πανεπιστημιούπολη;</span>

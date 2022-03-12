@@ -8,7 +8,7 @@ export default interface Place {
     description: {
         en: string | undefined,
         el: string | undefined
-    },
+    } | undefined,
     website: string | undefined,
     telephone: string | undefined,
     coordinates: number[],
@@ -16,4 +16,5 @@ export default interface Place {
     type: PlaceType,
     keywords: string[],
     lessons: string[],
+    marker: any | undefined // Do not include in the campus file! This is only for use within the front-end code.
 }
