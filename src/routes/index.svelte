@@ -4,7 +4,6 @@
     import axios from "axios";
     import type Place from "../types/place";
     import type Campus from "../types/place";
-    import {Compass, Hourglass} from "svelte-bootstrap-icons";
     import Fuse from 'fuse.js'
 
     let campus: undefined | Campus;
@@ -145,7 +144,7 @@
     <div class="flex flex-col justify-center items-center h-screen w-full  z-20 ">
         {#if showOverlay}
             {#if !campus}
-            <p class="text-2xl"><Hourglass/></p>
+            <p class="text-2xl">. . .</p>
             {:else}
                 <div class="h-full w-full py-4 px-4  text-hmu-green z-20 flex justify-center items-center gap-12 bg-[#ffffff81] backdrop-blur flex-col">
                     <img src="/logo-el.png" class="w-56 md:w-40 -mt-20" alt="HMU"/>
@@ -167,7 +166,7 @@
                             {/if}
                         </div>
                     {/if}
-                    <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}><Compass/>Θέλω απλά να δώ τον χάρτη</span>
+                    <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}>Θέλω απλά να δώ τον χάρτη</span>
 
                 </div>
                 <!-- <div class="w-full py-10 bg-[#202020d3] backdrop-blur shadow-lg z-20 flex justify-center items-center flex-col gap-6">
