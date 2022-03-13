@@ -28,8 +28,8 @@
                 "el": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου"
             },
             "description": {
-                "en": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου",
-                "el": "Studio FM1 Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου"
+                "en": "Student Radio Station of HMU Herakleion campus",
+                "el": "Φοιτητικός Ραδιοφωνικός Σταθμός ΕΛ.ΜΕ.ΠΑ. Ηρακλείου"
             },
             "coordinates":[
 
@@ -38,6 +38,8 @@
             ],
             "floor": 1,
             "type": 5,
+            "telephone": "+30 281 031 5445",
+            "website": "https://fm1.hmu.gr",
             "keywords": ["fm1", "studio", "radio"]
         },
         {
@@ -52,7 +54,10 @@
             ],
             "floor": 1,
             "type": 0,
-            "keywords": ["micro", "electronics", "lab"]
+            "keywords": ["micro", "electronics", "lab", "δίκτυα", "δικτια", "δύκτια", "δυκτια", "υπολογιστών", "diktia", "παναγιωτάκης", "παναγιοτακης", "panagiotakis"],
+            "lessons": [
+                "Δίκτυα Υπολογιστών"
+            ]
         },
         {
             "name": {

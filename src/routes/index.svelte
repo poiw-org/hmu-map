@@ -89,7 +89,7 @@
             fuse = new Fuse([], {
                 includeScore: true,
                 useExtendedSearch: true,
-                keys: ['name.en', 'name.el', "description.en", "description.el", 'keywords']
+                keys: ['name.en', 'name.el', "description.en", "description.el", "keywords", "lessons"]
             })
 
             // https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
@@ -194,7 +194,7 @@
 
 
 <main>
-    <div class="absolute top-0 bottom-0 right-0 left-0 z-10 flex flex-col md:flex-row-reverse ">
+    <div class="absolute top-0 bottom-0 right-0 left-0 z-10 flex flex-col md:flex-row-reverse justify-center overflow-y-hidden">
         <div id="map" class="w-full h-full"></div>
         {#if placeInFocus}
         <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto">
@@ -211,7 +211,14 @@
 
                 <p>{placeInFocus.description?.el || ""}</p>
 
-
+                {#if (placeInFocus.type == PlaceType.CLASSROOM || placeInFocus.type == PlaceType.LAB) && placeInFocus.lessons}
+                    <div class="flex flex-col">
+                        <p class="mb-4">Χρήστες αναφέρουν ότι σε αυτήν την αίθουσα πραγματοποιούνται τα εξής μαθήματα:</p>
+                        {#each placeInFocus.lessons as lesson}
+                            <span class="font-bold">{lesson}</span>
+                        {/each}
+                    </div>
+                {/if}
                 <!-- Links -->
                 <div class="flex items-center gap-5 text-hmu-green">
                     <a class="flex items-center gap-1" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> Οδηγίες</a>
@@ -228,7 +235,7 @@
             <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
             {:else}
                 <div class="h-full w-full py-4 px-4  text-hmu-green z-20 flex justify-center items-center gap-12 bg-[#ffffff81] backdrop-blur flex-col">
-                    <img src="/logo-el.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>
+                    {#if !searchBoxIsFocussed}<img src="/logo-el.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>{/if}
                     <div class="flex items-center justify-center gap-4 flex-wrap">
                         <!-- <p class="font-bold tracking-wide text-lg">{campus.name.el}</p> -->
                         {#if !searchBoxIsFocussed} <p class="text-3xl md:text-4xl w-screen md:w-auto text-center">Που είναι</p>{/if}
@@ -238,7 +245,7 @@
 
                     {#if searchBoxIsFocussed}
                         <div class="bg-white p-4 w-[calc(100vw-60px)] md:w-96 -mt-12 flex flex-col gap-5">
-                            {#if searchResults}
+                            {#if searchResults.length > 0}
                                 {#each searchResults as place}
                                     <div class="cursor-pointer " on:click={focusMap(place.item)}>{place.item.name.el}</div>
                                 {/each}
