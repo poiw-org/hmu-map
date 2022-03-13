@@ -6,6 +6,12 @@
     import type Campus from "../types/place";
     import Fuse from 'fuse.js'
 
+    // Icons
+    // You can find what you need at https://svelte-icons-explorer.vercel.app/
+    import IoMdCompass from 'svelte-icons/io/IoMdCompass.svelte'
+
+    import { Jumper } from 'svelte-loading-spinners'
+
     let campus: undefined | Campus;
     let placeholder = "λέσχη";
     let searchBoxIsFocussed = false;
@@ -144,7 +150,7 @@
     <div class="flex flex-col justify-center items-center h-screen w-full  z-20 ">
         {#if showOverlay}
             {#if !campus}
-            <p class="text-2xl">. . .</p>
+            <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
             {:else}
                 <div class="h-full w-full py-4 px-4  text-hmu-green z-20 flex justify-center items-center gap-12 bg-[#ffffff81] backdrop-blur flex-col">
                     <img src="/logo-el.png" class="w-56 md:w-40 -mt-20" alt="HMU"/>
@@ -166,7 +172,7 @@
                             {/if}
                         </div>
                     {/if}
-                    <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}>Θέλω απλά να δώ τον χάρτη</span>
+                    <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}><span class="w-4"><IoMdCompass /></span> Θέλω απλά να δώ τον χάρτη</span>
 
                 </div>
                 <!-- <div class="w-full py-10 bg-[#202020d3] backdrop-blur shadow-lg z-20 flex justify-center items-center flex-col gap-6">
