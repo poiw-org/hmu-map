@@ -56,6 +56,7 @@
 
     ]
     onMount(async () => {
+        if(!window) var window = {}
         if(browser) {
             const L = await import('leaflet');
             await import("../plugins/leaflet-bounce/bouncemarker")
