@@ -4,5 +4,7 @@ export enum PlaceType {
     LIBRARY,
     CAFETERIA,
     ADMINISTRATION,
-    STUDENT_CLUB
+    STUDENT_CLUB,
+    PROFESSOR_OFFICE,
+    DEPARTMENT
 }

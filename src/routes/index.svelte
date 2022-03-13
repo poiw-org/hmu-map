@@ -14,6 +14,8 @@
     import IoMdCompass from 'svelte-icons/io/IoMdCompass.svelte'
     import IoIosNavigate from 'svelte-icons/io/IoIosNavigate.svelte'
     import IoIosLink from 'svelte-icons/io/IoIosLink.svelte'
+    import IoIosArrowRoundBack from 'svelte-icons/io/IoIosArrowRoundBack.svelte'
+    import IoIosSearch from 'svelte-icons/io/IoIosSearch.svelte'
 
     import { Jumper } from 'svelte-loading-spinners';
     import { PlaceType } from '../types/place_types';
@@ -30,6 +32,7 @@
 
     let doSearch: () => Promise<void>;
     let focusMap: (place: Place) => Promise<void>;
+    let unfocusMap: () => Promise<void>;
 
     let searchBoxEvent = (e) => {
             if(e.type == "keydown" || e.type == "change" || e.type == "keyup" ) {
@@ -44,6 +47,7 @@
 
     let toggleOverlay = () => showOverlay = !showOverlay
 
+
     let possiblePlaceholders = [
         "λέσχη",
         "εργαστήριο 2",
@@ -56,6 +60,7 @@
 
     ]
     onMount(async () => {
+        if(!window) var window = {}
         if(browser) {
             const L = await import('leaflet');
             await import("../plugins/leaflet-bounce/bouncemarker")
@@ -72,12 +77,11 @@
                 placeholder = possiblePlaceholders[Math.floor(Math.random() * possiblePlaceholders.length)];
             },3000)
 
-            const zoom = 18;
+            const zoom = 20;
             const lat = 35.31796;
             const lng = 25.10308;
 
             var map = L.map("map", config).setView([lat, lng], zoom);
-            var markers = new L.layerGroup();
 
             campus = (await axios.get("./herakleion.json")).data
 
@@ -105,15 +109,17 @@
                                 case PlaceType.CLASSROOM:
                                     return "/teacher_1f9d1-200d-1f3eb.png";
                                 case PlaceType.CAFETERIA:
-                                    return "/teacher_1f9d1-200d-1f3eb.png";
+                                    return "/hamburger_1f354.png";
                                 case PlaceType.LIBRARY:
                                     return "/open-book_1f4d6.png";
                                 case PlaceType.ADMINISTRATION:
                                     return "/office-building_1f3e2.png";
                                 case PlaceType.STUDENT_CLUB:
-                                    return "people-holding-hands_1f9d1-200d-1f91d-200d-1f9d1.png";
+                                    return "/people-holding-hands_1f9d1-200d-1f91d-200d-1f9d1.png";
+                                case PlaceType.PROFESSOR_OFFICE:
+                                    return "/graduation-cap_1f393.png"
                                 default:
-                                    return "/hamburger_1f354.png"
+                                    return "/round-pushpin_1f4cd.png"
                             }
                         }
 
@@ -146,27 +152,28 @@
 
             focusMap = async (place: Place) => {
                 placeInFocus = place
-                map.setView([place.coordinates[0],place.coordinates[1]], 20);
+                searchQuery = ""
+                searchResults = []
+                searchBoxIsFocussed = false
+                map.setView([place.coordinates[0],place.coordinates[1]], config.maxZoom);
 
                 setTimeout(()=>{
                     map.invalidateSize()
                     place.marker.bounce({duration: 2000, height: 50, loop: 3})
                 },500)
 
-
-
-
-                // let marker = L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
-                //     icon: new L.Icon({
-                //         iconUrl: '/marker-icon-red.png',
-                //         iconAnchor: new L.Point(16, 16),
-                //     })
-                // })
-                //     .bindPopup(place.description ? place.description.el : "")
-                //     .addTo(map)
-
-
                 showOverlay = false;
+            }
+
+            unfocusMap = async () => {
+                placeInFocus = undefined
+                map.setView([lat,lng], zoom);
+
+                setTimeout(()=>{
+                    map.invalidateSize()
+                },500)
+
+                showOverlay = true;
             }
 
             // obtaining coordinates after clicking on the map
@@ -191,9 +198,16 @@
         <div id="map" class="w-full h-full"></div>
         {#if placeInFocus}
         <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto">
-            <div class="xl:px-10 rounded flex flex-col gap-4  ">
+            <div class="xl:px-10 rounded flex flex-col gap-4 ">
+                <span class="flex items-center gap-2 mb-4 cursor-pointer" on:click={unfocusMap()}>
+                    <span class="w-4"><IoIosArrowRoundBack/></span>
+                    Πίσω
+                </span>
                 <h2 class="text-2xl font-bold flex items-center gap-4 text-hmu-green"><img src={getPlaceIcon(placeInFocus)}  class="w-8"/> {placeInFocus.name.el}</h2>
-                {#if placeInFocus.floor}<p class="font-bold">ΟΡΟΦΟΣ: {placeInFocus.floor}</p>{/if}
+                <div class="flex items-center flex-wrap gap-4">
+                    {#if placeInFocus.floor}<p class="font-bold text-sm">ΟΡΟΦΟΣ: {placeInFocus.floor}</p>{/if}
+                    {#if placeInFocus.telephone}<p class="font-bold text-sm">ΤΗΛΕΦΩΝΟ: {placeInFocus.telephone}</p>{/if}
+                </div>
 
                 <p>{placeInFocus.description?.el || ""}</p>
 
@@ -214,16 +228,16 @@
             <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
             {:else}
                 <div class="h-full w-full py-4 px-4  text-hmu-green z-20 flex justify-center items-center gap-12 bg-[#ffffff81] backdrop-blur flex-col">
-                    <img src="/logo-el.png" class="w-56 md:w-40 -mt-20" alt="HMU"/>
+                    <img src="/logo-el.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>
                     <div class="flex items-center justify-center gap-4 flex-wrap">
                         <!-- <p class="font-bold tracking-wide text-lg">{campus.name.el}</p> -->
-                        {#if !searchBoxIsFocussed} <p class="text-4xl md:text-4xl w-screen md:w-auto text-center">Που είναι</p>{/if}
-                        <input type="text" on:keyup={searchBoxEvent} on:change={searchBoxEvent} on:focus={searchBoxEvent} bind:value={searchQuery} class="w-64 md:w-96 rounded-sm text-center tracking-wide font-medium bg-transparent text-hmu-green placeholder:text-hmu-green text-4xl md:text-4xl border-b-2 border-hmu-green" placeholder={placeholder}>
-                        {#if !searchBoxIsFocussed}<p class="text-4xl md:text-4xl">;</p>{/if}
+                        {#if !searchBoxIsFocussed} <p class="text-3xl md:text-4xl w-screen md:w-auto text-center">Που είναι</p>{/if}
+                        <span class="flex items-center"><span class="w-10 -mr-10"><IoIosSearch/></span><input type="text" on:keyup={searchBoxEvent} on:change={searchBoxEvent} on:focus={searchBoxEvent} bind:value={searchQuery} class="w-[calc(100vw-60px)] md:w-96 rounded-sm text-center tracking-wide font-medium bg-transparent text-hmu-green placeholder:text-hmu-green text-3xl md:text-4xl border-b-2 border-hmu-green pl-10" placeholder={placeholder}></span>
+                        {#if !searchBoxIsFocussed}<p class="text-3xl md:text-4xl">;</p>{/if}
                     </div>
 
                     {#if searchBoxIsFocussed}
-                        <div class="bg-white p-4 w-64 md:w-96 -mt-12 flex flex-col gap-5">
+                        <div class="bg-white p-4 w-[calc(100vw-60px)] md:w-96 -mt-12 flex flex-col gap-5">
                             {#if searchResults}
                                 {#each searchResults as place}
                                     <div class="cursor-pointer " on:click={focusMap(place.item)}>{place.item.name.el}</div>

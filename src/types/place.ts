@@ -12,7 +12,7 @@ export default interface Place {
     website: string | undefined,
     telephone: string | undefined,
     coordinates: number[],
-    floor: number,
+    floor: number | undefined,
     type: PlaceType,
     keywords: string[],
     lessons: string[],
