@@ -10,6 +10,7 @@
     // You can find what you need at https://svelte-icons-explorer.vercel.app/
     import IoMdCompass from 'svelte-icons/io/IoMdCompass.svelte'
     import IoIosNavigate from 'svelte-icons/io/IoIosNavigate.svelte'
+    import IoIosLink from 'svelte-icons/io/IoIosLink.svelte'
 
     import { Jumper } from 'svelte-loading-spinners';
     import { PlaceType } from '../types/place_types';
@@ -139,12 +140,16 @@
             }
 
             focusMap = async (place: Place) => {
+                placeInFocus = place
                 map.setView([place.coordinates[0],place.coordinates[1]], 20);
 
-                setTimeout(()=>place.marker.bounce({duration: 2000, height: 50, loop: 3}),500)
+                setTimeout(()=>{
+                    map.invalidateSize()
+                    place.marker.bounce({duration: 2000, height: 50, loop: 3})
+                },500)
 
 
-                placeInFocus = place
+
 
                 // let marker = L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
                 //     icon: new L.Icon({
@@ -177,18 +182,28 @@
 
 
 <main>
-    <div id="map" class="absolute top-0 bottom-0 right-0 left-0 z-10"></div>
-    <div class={`flex ${placeInFocus ? "flex-col justify-end" : "flex-col justify-center" } items-center h-screen w-screen z-20`}>
+    <div class="absolute top-0 bottom-0 right-0 left-0 z-10 flex flex-col md:flex-row-reverse ">
+        <div id="map" class="w-full h-full"></div>
         {#if placeInFocus}
-        <div class="flex z-20 justify-start items-center p-10">
-            <div class="bg-white p-10 rounded shadow-lg min-w-[400px] flex flex-col gap-4">
+        <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto">
+            <div class="xl:px-10 rounded flex flex-col gap-4  ">
                 <h2 class="text-2xl font-bold flex items-center gap-4 text-hmu-green"><img src={getPlaceIcon(placeInFocus)}  class="w-8"/> {placeInFocus.name.el}</h2>
+                {#if placeInFocus.floor}<p class="font-bold">ΟΡΟΦΟΣ: {placeInFocus.floor}</p>{/if}
+
                 <p>{placeInFocus.description?.el || ""}</p>
-                <a class="flex items-center gap-1 text-hmu-green" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> Οδηγίες</a>
+
+
+                <!-- Links -->
+                <div class="flex items-center gap-5 text-hmu-green">
+                    <a class="flex items-center gap-1" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> Οδηγίες</a>
+                    {#if placeInFocus.website}<a class="flex items-center gap-1" href={placeInFocus.website} target="_blank"><span class="w-5"><IoIosLink/></span>Ιστοσελιδα</a>{/if}
+                </div>
+
             </div>
         </div>
         {/if}
-
+    </div>
+    <div class={`flex ${placeInFocus ? "flex-col justify-end" : "flex-col justify-center" } items-center h-screen w-screen z-20`}>
         {#if showOverlay}
             {#if !campus}
             <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
