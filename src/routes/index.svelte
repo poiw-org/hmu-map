@@ -3,14 +3,16 @@
     import { browser } from '$app/env';
     import axios from "axios";
     import type Place from "../types/place";
-    import type Campus from "../types/place";
+    import type Campus from "../types/campus";
     import Fuse from 'fuse.js'
 
     // Icons
     // You can find what you need at https://svelte-icons-explorer.vercel.app/
     import IoMdCompass from 'svelte-icons/io/IoMdCompass.svelte'
+    import IoIosNavigate from 'svelte-icons/io/IoIosNavigate.svelte'
 
-    import { Jumper } from 'svelte-loading-spinners'
+    import { Jumper } from 'svelte-loading-spinners';
+    import { PlaceType } from '../types/place_types';
 
     let campus: undefined | Campus;
     let placeholder = "λέσχη";
@@ -19,6 +21,8 @@
     let searchQuery = "";
     let searchResults: any;
     let fuse: any;
+    let placeInFocus: undefined | Place;
+    let getPlaceIcon: string;
 
     let doSearch: () => Promise<void>;
     let focusMap: (place: Place) => Promise<void>;
@@ -50,6 +54,7 @@
     onMount(async () => {
         if(browser) {
             const L = await import('leaflet');
+            await import("../plugins/leaflet-bounce/bouncemarker")
 
             let config = {
                 minZoom: 0,
@@ -89,41 +94,67 @@
 
             // show the scale bar on the lower left corner
             // L.control.scale({ imperial: true, metric: true }).addTo(map);
+            getPlaceIcon = (place: Place): string =>{
+                            switch(place.type){
+                                case PlaceType.LAB:
+                                    return "/microscope_1f52c.png";
+                                case PlaceType.CLASSROOM:
+                                    return "/teacher_1f9d1-200d-1f3eb.png";
+                                case PlaceType.CAFETERIA:
+                                    return "/teacher_1f9d1-200d-1f3eb.png";
+                                case PlaceType.LIBRARY:
+                                    return "/open-book_1f4d6.png";
+                                case PlaceType.ADMINISTRATION:
+                                    return "/office-building_1f3e2.png";
+                                case PlaceType.STUDENT_CLUB:
+                                    return "people-holding-hands_1f9d1-200d-1f91d-200d-1f9d1.png";
+                                default:
+                                    return "/hamburger_1f354.png"
+                            }
+                        }
 
             campus.places.forEach((place: Place) => {
-                let marker = new L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
+                let marker = new L.Marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
                     icon: new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-                        iconAnchor: new L.Point(16, 16),
-                    })
+                        iconUrl: getPlaceIcon(place),
+                        iconSize: [32,32],
+                        iconAnchor: new L.Point(8, 16),
+                    }),
                 })
-                .bindPopup(place.description ? place.description.el : "")
-                .addTo(map);
+                .addTo(map)
+                .on('click', ()=>focusMap({
+                    ...place,
+                    marker
+                }))
 
                 fuse.add({
                     ...place,
-                    marker: marker._leaflet_id
+                    marker
                 })
 
-                markers.addLayer(marker)
             });
 
             doSearch = async () => {
                 searchResults = fuse.search(searchQuery);
-                console.log(searchResults)
             }
 
             focusMap = async (place: Place) => {
-                map.setView([place.coordinates[0]-0.0001,place.coordinates[1]], 20); // We subtract 0.0001 from the Y axis so that we can position the info panel correctly
+                map.setView([place.coordinates[0],place.coordinates[1]], 20);
 
-                let marker = new L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
-                    icon: new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-                        iconAnchor: new L.Point(16, 16),
-                    })
-                })
-                    .bindPopup(place.description ? place.description.el : "")
-                    .addTo(map);
+                setTimeout(()=>place.marker.bounce({duration: 2000, height: 50, loop: 3}),500)
+
+
+                placeInFocus = place
+
+                // let marker = L.marker(new L.LatLng(place.coordinates[0],place.coordinates[1]),{
+                //     icon: new L.Icon({
+                //         iconUrl: '/marker-icon-red.png',
+                //         iconAnchor: new L.Point(16, 16),
+                //     })
+                // })
+                //     .bindPopup(place.description ? place.description.el : "")
+                //     .addTo(map)
+
 
                 showOverlay = false;
             }
@@ -147,7 +178,17 @@
 
 <main>
     <div id="map" class="absolute top-0 bottom-0 right-0 left-0 z-10"></div>
-    <div class="flex flex-col justify-center items-center h-screen w-full  z-20 ">
+    <div class={`flex ${placeInFocus ? "flex-col justify-end" : "flex-col justify-center" } items-center h-screen w-screen z-20`}>
+        {#if placeInFocus}
+        <div class="flex z-20 justify-start items-center p-10">
+            <div class="bg-white p-10 rounded shadow-lg min-w-[400px] flex flex-col gap-4">
+                <h2 class="text-2xl font-bold flex items-center gap-4 text-hmu-green"><img src={getPlaceIcon(placeInFocus)}  class="w-8"/> {placeInFocus.name.el}</h2>
+                <p>{placeInFocus.description?.el || ""}</p>
+                <a class="flex items-center gap-1 text-hmu-green" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> Οδηγίες</a>
+            </div>
+        </div>
+        {/if}
+
         {#if showOverlay}
             {#if !campus}
             <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
@@ -173,11 +214,8 @@
                         </div>
                     {/if}
                     <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}><span class="w-4"><IoMdCompass /></span> Θέλω απλά να δώ τον χάρτη</span>
-
                 </div>
-                <!-- <div class="w-full py-10 bg-[#202020d3] backdrop-blur shadow-lg z-20 flex justify-center items-center flex-col gap-6">
 
-                </div> -->
             {/if}
         {/if}
     </div>
