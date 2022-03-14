@@ -44,8 +44,8 @@
         },
         {
             "name": {
-                "en": "Microelectronics Laboratory",
-                "el": "Εργαστηρίο Μικροηλεκτρονικής"
+                "en": "Networking and Sensors Laboratory",
+                "el": "Εργαστηρίο Δικτύων και Αισθητήρων"
             },
 
             "coordinates":[
@@ -54,7 +54,7 @@
             ],
             "floor": 1,
             "type": 0,
-            "keywords": ["micro", "electronics", "lab", "δίκτυα", "δικτια", "δύκτια", "δυκτια", "υπολογιστών", "diktia", "παναγιωτάκης", "παναγιοτακης", "panagiotakis"],
+            "keywords": ["αισθητήρες","εσθητιρες","εσθιτιρες","εσθητιρων","micro", "electronics", "lab", "δίκτυα", "δικτια", "δύκτια", "δυκτια", "υπολογιστών", "diktia", "παναγιωτάκης", "παναγιοτακης", "panagiotakis"],
             "lessons": [
                 "Δίκτυα Υπολογιστών"
             ]

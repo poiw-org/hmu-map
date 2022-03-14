@@ -8,7 +8,7 @@
     import type Place from "../types/place";
     import type Campus from "../types/campus";
     import Fuse from 'fuse.js'
-
+    import translations from "../translations/all"
     // Icons
     // You can find what you need at https://svelte-icons-explorer.vercel.app/
     import IoMdCompass from 'svelte-icons/io/IoMdCompass.svelte'
@@ -16,9 +16,21 @@
     import IoIosLink from 'svelte-icons/io/IoIosLink.svelte'
     import IoIosArrowRoundBack from 'svelte-icons/io/IoIosArrowRoundBack.svelte'
     import IoIosSearch from 'svelte-icons/io/IoIosSearch.svelte'
+    import IoMdRefresh from 'svelte-icons/io/IoMdRefresh.svelte'
+    import IoIosGlobe from 'svelte-icons/io/IoIosGlobe.svelte'
 
     import { Jumper } from 'svelte-loading-spinners';
     import { PlaceType } from '../types/place_types';
+
+    let selectableCampuses = [
+        "herakleion",
+        "agiosNikolaos",
+        "sitia",
+        "rethymno"
+    ]
+
+    let lang = "el";
+    let selectedCampusSlug = selectableCampuses[0];
 
     let campus: undefined | Campus;
     let placeholder = "λέσχη";
@@ -34,6 +46,21 @@
     let focusMap: (place: Place) => Promise<void>;
     let unfocusMap: () => Promise<void>;
 
+    let randomSuggestedSearchQuery = () => {
+        placeholder = translations.overlay.sampleSearches[lang][Math.floor(Math.random() * translations.overlay.sampleSearches[lang].length)];
+    }
+
+    let changeLanguage = (preferedLanguage: any): void => {
+        if(preferedLanguage == "en" || preferedLanguage == "el") lang = preferedLanguage
+        else{
+            if(lang == "en") lang = "el"
+            else lang = "en"
+        }
+
+        randomSuggestedSearchQuery()
+    }
+
+
     let searchBoxEvent = (e) => {
             if(e.type == "keydown" || e.type == "change" || e.type == "keyup" ) {
                 if(searchQuery){
@@ -48,17 +75,6 @@
     let toggleOverlay = () => showOverlay = !showOverlay
 
 
-    let possiblePlaceholders = [
-        "λέσχη",
-        "εργαστήριο 2",
-        "φοιτητική μέριμνα",
-        "αμφιθέατρο α",
-        "γραμματεία ημμυ",
-        "εργαστήριο σαε",
-        "αίθουσα 5",
-        "νοσηλευτική",
-
-    ]
     onMount(async () => {
         if(!window) var window = {}
         if(browser) {
@@ -72,10 +88,9 @@
                 zoomControl: false
             };
 
+
             // Set random placeholder at the search text field
-            setInterval(()=>{
-                placeholder = possiblePlaceholders[Math.floor(Math.random() * possiblePlaceholders.length)];
-            },3000)
+            setInterval(()=>randomSuggestedSearchQuery(),3000)
 
             const zoom = 20;
             const lat = 35.31796;
@@ -83,7 +98,7 @@
 
             var map = L.map("map", config).setView([lat, lng], zoom);
 
-            campus = (await axios.get("./herakleion.json")).data
+            campus = (await axios.get(`./${selectedCampusSlug}.json`)).data
 
 
             fuse = new Fuse([], {
@@ -150,19 +165,22 @@
                 });
             }
 
-            focusMap = async (place: Place) => {
-                placeInFocus = place
-                searchQuery = ""
-                searchResults = []
-                searchBoxIsFocussed = false
-                map.setView([place.coordinates[0],place.coordinates[1]], config.maxZoom);
-
+            let bouceMarkerAnimation = (place: Place) => {
                 setTimeout(()=>{
                     map.invalidateSize()
-                    place.marker.bounce({duration: 2000, height: 50, loop: 3})
+                    place.marker.bounce({duration: 1000, height: 50, loop: 1}, ()=>{
+                        if(placeInFocus == place) bouceMarkerAnimation(place)
+                        else place.marker.setLatLng([place.coordinates[0],place.coordinates[1]])
+                    })
                 },500)
+            }
 
-                showOverlay = false;
+            focusMap = async (place: Place) => {
+                searchQuery = ""; searchResults = []; searchBoxIsFocussed = false; showOverlay = false;
+
+                placeInFocus = place;
+                map.setView([place.coordinates[0],place.coordinates[1]], config.maxZoom);
+                bouceMarkerAnimation(place);
             }
 
             unfocusMap = async () => {
@@ -195,25 +213,25 @@
 
 <main>
     <div class="absolute top-0 bottom-0 right-0 left-0 z-10 flex flex-col md:flex-row-reverse justify-center overflow-y-hidden">
-        <div id="map" class="w-full h-full"></div>
+        <div id="map" class="w-full h-full "></div>
         {#if placeInFocus}
-        <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto">
+        <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto animate-slideIn">
             <div class="xl:px-10 rounded flex flex-col gap-4 ">
                 <span class="flex items-center gap-2 mb-4 cursor-pointer" on:click={unfocusMap()}>
                     <span class="w-4"><IoIosArrowRoundBack/></span>
                     Πίσω
                 </span>
-                <h2 class="text-2xl font-bold flex items-center gap-4 text-hmu-green"><img src={getPlaceIcon(placeInFocus)}  class="w-8"/> {placeInFocus.name.el}</h2>
+                <h2 class="text-2xl font-bold flex items-center gap-4 text-hmu-green"><img src={getPlaceIcon(placeInFocus)}  class="w-8"/> {placeInFocus.name[lang]}</h2>
                 <div class="flex items-center flex-wrap gap-4">
-                    {#if placeInFocus.floor}<p class="font-bold text-sm">ΟΡΟΦΟΣ: {placeInFocus.floor}</p>{/if}
-                    {#if placeInFocus.telephone}<p class="font-bold text-sm">ΤΗΛΕΦΩΝΟ: {placeInFocus.telephone}</p>{/if}
+                    {#if placeInFocus.floor}<p class="font-bold text-sm">{translations.place.floor[lang]}: {placeInFocus.floor}</p>{/if}
+                    {#if placeInFocus.telephone}<p class="font-bold text-sm">{translations.place.telephone}: {placeInFocus.telephone}</p>{/if}
                 </div>
 
-                <p>{placeInFocus.description?.el || ""}</p>
+                <p>{placeInFocus.description ? placeInFocus.description[lang] : ""}</p>
 
                 {#if (placeInFocus.type == PlaceType.CLASSROOM || placeInFocus.type == PlaceType.LAB) && placeInFocus.lessons}
                     <div class="flex flex-col">
-                        <p class="mb-4">Χρήστες αναφέρουν ότι σε αυτήν την αίθουσα πραγματοποιούνται τα εξής μαθήματα:</p>
+                        <p class="mb-4">{translations.place.lessonsReported[lang]}:</p>
                         {#each placeInFocus.lessons as lesson}
                             <span class="font-bold">{lesson}</span>
                         {/each}
@@ -221,8 +239,8 @@
                 {/if}
                 <!-- Links -->
                 <div class="flex items-center gap-5 text-hmu-green">
-                    <a class="flex items-center gap-1" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> Οδηγίες</a>
-                    {#if placeInFocus.website}<a class="flex items-center gap-1" href={placeInFocus.website} target="_blank"><span class="w-5"><IoIosLink/></span>Ιστοσελιδα</a>{/if}
+                    <a class="flex items-center gap-1" href={`https://www.google.com/maps/search/?api=1&query=${placeInFocus.coordinates[0]}%2C${placeInFocus.coordinates[1]}`} target="_blank"><span class="w-5"><IoIosNavigate/></span> {translations.place.navigation[lang]}</a>
+                    {#if placeInFocus.website}<a class="flex items-center gap-1" href={placeInFocus.website} target="_blank"><span class="w-5"><IoIosLink/></span>{translations.place.website[lang]}</a>{/if}
                 </div>
 
             </div>
@@ -235,29 +253,49 @@
             <p class="w-8"><Jumper size="60" color="#1b495a" unit="px" duration="1s"></Jumper></p>
             {:else}
                 <div class="h-full w-full py-4 px-4  text-hmu-green z-20 flex justify-center items-center gap-12 bg-[#ffffff81] backdrop-blur flex-col">
-                    {#if !searchBoxIsFocussed}<img src="/logo-el.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>{/if}
+                    {#if !searchBoxIsFocussed}
+                        {#if lang =="el"}
+                            <img src="/logo-el.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>
+                        {:else}
+                            <img src="/logo-en.png" class="w-40 md:w-40 -mt-20" alt="HMU"/>
+                        {/if}
+                    {/if}
                     <div class="flex items-center justify-center gap-4 flex-wrap">
                         <!-- <p class="font-bold tracking-wide text-lg">{campus.name.el}</p> -->
-                        {#if !searchBoxIsFocussed} <p class="text-3xl md:text-4xl w-screen md:w-auto text-center">Που είναι</p>{/if}
+                        {#if !searchBoxIsFocussed} <p class="text-3xl md:text-4xl w-screen md:w-auto text-center">{translations.overlay.whereIs[lang]}</p>{/if}
                         <span class="flex items-center"><span class="w-10 -mr-10"><IoIosSearch/></span><input type="text" on:keyup={searchBoxEvent} on:change={searchBoxEvent} on:focus={searchBoxEvent} bind:value={searchQuery} class="w-[calc(100vw-60px)] md:w-96 rounded-sm text-center tracking-wide font-medium bg-transparent text-hmu-green placeholder:text-hmu-green text-3xl md:text-4xl border-b-2 border-hmu-green pl-10" placeholder={placeholder}></span>
-                        {#if !searchBoxIsFocussed}<p class="text-3xl md:text-4xl">;</p>{/if}
+                        {#if !searchBoxIsFocussed}<p class="text-3xl md:text-4xl">{translations.overlay.questionmark[lang]}</p>{/if}
                     </div>
 
                     {#if searchBoxIsFocussed}
                         <div class="bg-white p-4 w-[calc(100vw-60px)] md:w-96 -mt-12 flex flex-col gap-5">
                             {#if searchResults.length > 0}
                                 {#each searchResults as place}
-                                    <div class="cursor-pointer " on:click={focusMap(place.item)}>{place.item.name.el}</div>
+                                    <div class="cursor-pointer " on:click={focusMap(place.item)}>{place.item.name[lang]}</div>
                                 {/each}
                                 {:else}
                                 <span class="text-2xl">Δεν βρέθηκαν αποτελέσματα για την αναζήτησή σου. Μήπως έχεις επιλέξει λάθος πανεπιστημιούπολη;</span>
                             {/if}
                         </div>
-                    {/if}
-                    <span class="text-sm flex gap-2 items-center cursor-pointer" on:click={toggleOverlay}><span class="w-4"><IoMdCompass /></span> Θέλω απλά να δώ τον χάρτη</span>
-                </div>
+                        {:else}
+                        <div class="flex flex-col md:flex-row gap-3 md:justify-center md:items-center">
+                            <span class="font-bold flex gap-2 items-center cursor-pointer border border-1 border-hmu-green p-4 " on:click={toggleOverlay}><span class="w-4"><IoMdCompass /></span> {translations.overlay.justWantToSeeMap[lang]}</span>
+                            <span class="font-bold flex items-center gap-2 cursor-pointer border border-1 border-hmu-green p-4 "><span class="w-4"><IoMdRefresh /></span>
+                            <select class="form-select appearance-none bg-transparent font-bold">
+                            {#each selectableCampuses as campus}
+                                <option selected={selectedCampusSlug == campus['en']} >{translations.general.campuses[campus][lang]}</option>
+                            {/each}
 
+                          </select>
+                            </span>
+                            <span class="font-bold flex items-center gap-2 cursor-pointer border border-1 border-hmu-green p-4" on:click={changeLanguage}><span class="w-4"><IoIosGlobe /></span>{translations.overlay.changeLang[lang]}</span>
+                        </div>
+                    {/if}
+
+                    <span class="text-sm text-slate-500 tracking-wide"><a href="https://github.com/poiw-org/hmu-map" target="_blank">FOSS project, maintained by po/iw hackerspace.</a></span>
+                </div>
             {/if}
+
         {/if}
     </div>
 </main>
