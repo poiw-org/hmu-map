@@ -84,7 +84,7 @@
             let config = {
                 minZoom: 0,
                 maxZoom: 19,
-                attributionControl: false,
+                //attributionControl: false,
                 zoomControl: false
             };
 
@@ -98,6 +98,9 @@
 
             var map = L.map("map", config).setView([lat, lng], zoom);
 
+	    // Remove leaflet attribution prefix
+	    map.attributionControl.setPrefix("");
+
             campus = (await axios.get(`./${selectedCampusSlug}.json`)).data
 
 
@@ -109,14 +112,15 @@
 
             // https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
             // add the OpenStreetMap tiles
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            let layer = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 maxZoom: 19,
-                attribution:
-                '&#127279; <a href="https://poiw.org">po/iw hackerspace</a>',
-            }).addTo(map);
+                attribution: 'Powered by <a href="https://poiw.org">po/iw hackerspace</a>'
+            })
+	    .addTo(map);
 
             // show the scale bar on the lower left corner
             // L.control.scale({ imperial: true, metric: true }).addTo(map);
+
             getPlaceIcon = (place: Place): string =>{
                             switch(place.type){
                                 case PlaceType.LAB:
@@ -217,7 +221,7 @@
         {#if placeInFocus}
         <div class="flex justify-start xl:items-center p-10 min-h-[50vh] xl:h-auto  w-full xl:w-[50vw] overflow-y-auto animate-slideIn">
             <div class="xl:px-10 rounded flex flex-col gap-4 ">
-                <span class="flex items-center gap-2 mb-4 cursor-pointer" on:click={unfocusMap()}>
+                <span class="flex items-center gap-2 mb-4 cursor-pointer" on:click={focusMap()}>
                     <span class="w-4"><IoIosArrowRoundBack/></span>
                     Πίσω
                 </span>
@@ -292,7 +296,7 @@
                         </div>
                     {/if}
 
-                    <span class="text-sm text-slate-500 tracking-wide"><a href="https://github.com/poiw-org/hmu-map" target="_blank">FOSS project, maintained by po/iw hackerspace.</a></span>
+                    <span class="text-sm text-slate-500 tracking-wide"><a href="https://github.com/poiw-org/hmu-map" target="_blank">FLOSS project, maintained by po/iw hackerspace.</a></span>
                 </div>
             {/if}
 
