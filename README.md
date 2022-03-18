@@ -1,3 +1,7 @@
+## About
+
+HMU-map is an effort to create a quick and easy way for students to find labs and buildings on the HMU campus.
+
 ## Developing
 
 Once you've git pulled the project and installed its dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
